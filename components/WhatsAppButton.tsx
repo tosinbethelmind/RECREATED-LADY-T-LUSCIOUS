@@ -1,10 +1,11 @@
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
-import { COMPANY_PHONE } from '../constants';
+import { useData } from '../context/DataContext';
 
 export const WhatsAppButton: React.FC = () => {
+  const { siteContent } = useData();
   // Remove spaces and + for the link
-  const cleanPhone = COMPANY_PHONE.replace(/[^0-9]/g, '');
+  const cleanPhone = siteContent.general.phone.replace(/[^0-9]/g, '');
   const whatsappLink = `https://wa.me/${cleanPhone}`;
 
   return (

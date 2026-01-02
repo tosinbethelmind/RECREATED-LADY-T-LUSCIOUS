@@ -26,3 +26,23 @@ export interface RouteLink {
   path: string;
   label: string;
 }
+
+export interface SiteContent {
+  general: {
+    companyName: string;
+    tagline: string;
+    phone: string;
+    email: string;
+    address: string;
+  };
+  home: {
+    heroBadge: string;
+    heroTitle: string;
+    heroSubtitle: string;
+  };
+  about: {
+    title: string;
+    welcomeText: string;
+    philosophyText: string;
+  };
+}

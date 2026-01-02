@@ -1,16 +1,18 @@
 import React from 'react';
 import { Button } from '../components/Button';
 import { MessageCircle } from 'lucide-react';
-import { COMPANY_PHONE } from '../constants';
+import { useData } from '../context/DataContext';
 
 export const Order: React.FC = () => {
+  const { siteContent } = useData();
+
   return (
     <div className="py-16 bg-background min-h-screen">
       <div className="container max-w-3xl">
         <div className="text-center mb-12">
            <h1 className="text-4xl font-bold font-serif text-stone-900 mb-6">How to Order</h1>
            <p className="text-stone-600 text-lg">
-             Ordering from Lady T Luscious is simple. We want to ensure your experience is as sweet as our treats.
+             Ordering from {siteContent.general.companyName} is simple. We want to ensure your experience is as sweet as our treats.
            </p>
         </div>
 
@@ -25,7 +27,7 @@ export const Order: React.FC = () => {
                 <MessageCircle className="mr-2 h-5 w-5" />
                 WhatsApp Order
               </Button>
-              <Button variant="outline">Call {COMPANY_PHONE}</Button>
+              <Button variant="outline">Call {siteContent.general.phone}</Button>
             </div>
           </div>
 

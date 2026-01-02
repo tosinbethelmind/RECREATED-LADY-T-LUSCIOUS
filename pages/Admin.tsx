@@ -1,15 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { useData } from '../context/DataContext';
-import { Trash2, Plus, Upload, Image as ImageIcon, Utensils } from 'lucide-react';
+import { Trash2, Plus, Upload, Save, FileText } from 'lucide-react';
 
 export const Admin: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'menu' | 'gallery'>('menu');
+  const [activeTab, setActiveTab] = useState<'menu' | 'gallery' | 'content'>('menu');
 
-  const { menuItems, addMenuItem, deleteMenuItem, galleryItems, addGalleryItem, deleteGalleryItem } = useData();
+  const { 
+    menuItems, addMenuItem, deleteMenuItem, 
+    galleryItems, addGalleryItem, deleteGalleryItem,
+    siteContent, updateSiteContent
+  } = useData();
 
   // Simple Form States for adding items
   const [newItemName, setNewItemName] = useState('');
@@ -21,8 +25,16 @@ export const Admin: React.FC = () => {
   const [newGalleryCategory, setNewGalleryCategory] = useState('Dishes');
   const [newGalleryImage, setNewGalleryImage] = useState('');
 
+  // Content editing state
+  const [editableContent, setEditableContent] = useState(siteContent);
+  const [contentSaved, setContentSaved] = useState(false);
+
   const menuFileInputRef = useRef<HTMLInputElement>(null);
   const galleryFileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setEditableContent(siteContent);
+  }, [siteContent]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +90,13 @@ export const Admin: React.FC = () => {
     if(galleryFileInputRef.current) galleryFileInputRef.current.value = '';
   };
 
+  const handleContentUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateSiteContent(editableContent);
+    setContentSaved(true);
+    setTimeout(() => setContentSaved(false), 3000);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -120,18 +139,24 @@ export const Admin: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-4 mb-8 border-b border-stone-200 pb-1">
+        <div className="flex space-x-4 mb-8 border-b border-stone-200 pb-1 overflow-x-auto">
           <button
             onClick={() => setActiveTab('menu')}
-            className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'menu' ? 'border-b-2 border-primary text-primary' : 'text-stone-500 hover:text-stone-800'}`}
+            className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'menu' ? 'border-b-2 border-primary text-primary' : 'text-stone-500 hover:text-stone-800'}`}
           >
-            Menu Management
+            Menu Items
           </button>
           <button
             onClick={() => setActiveTab('gallery')}
-            className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'gallery' ? 'border-b-2 border-primary text-primary' : 'text-stone-500 hover:text-stone-800'}`}
+            className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'gallery' ? 'border-b-2 border-primary text-primary' : 'text-stone-500 hover:text-stone-800'}`}
           >
-            Gallery Management
+            Gallery Images
+          </button>
+          <button
+            onClick={() => setActiveTab('content')}
+            className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'content' ? 'border-b-2 border-primary text-primary' : 'text-stone-500 hover:text-stone-800'}`}
+          >
+            Site Content
           </button>
         </div>
 
@@ -245,6 +270,117 @@ export const Admin: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Content Tab */}
+        {activeTab === 'content' && (
+          <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm">
+            <h3 className="text-xl font-bold mb-6 flex items-center"><FileText className="w-5 h-5 mr-2" /> Edit Website Content</h3>
+            <form onSubmit={handleContentUpdate} className="space-y-8">
+              
+              {/* General Section */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-lg text-amber-600 border-b pb-2">General Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700">Company Name</label>
+                    <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                      value={editableContent.general.companyName}
+                      onChange={e => setEditableContent({...editableContent, general: {...editableContent.general, companyName: e.target.value}})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700">Tagline</label>
+                    <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                      value={editableContent.general.tagline}
+                      onChange={e => setEditableContent({...editableContent, general: {...editableContent.general, tagline: e.target.value}})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700">Phone</label>
+                    <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                      value={editableContent.general.phone}
+                      onChange={e => setEditableContent({...editableContent, general: {...editableContent.general, phone: e.target.value}})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700">Email</label>
+                    <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                      value={editableContent.general.email}
+                      onChange={e => setEditableContent({...editableContent, general: {...editableContent.general, email: e.target.value}})}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-stone-700">Address</label>
+                    <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                      value={editableContent.general.address}
+                      onChange={e => setEditableContent({...editableContent, general: {...editableContent.general, address: e.target.value}})}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Home Section */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-lg text-amber-600 border-b pb-2">Home Page</h4>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700">Hero Badge (Pill text)</label>
+                  <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                    value={editableContent.home.heroBadge}
+                    onChange={e => setEditableContent({...editableContent, home: {...editableContent.home, heroBadge: e.target.value}})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700">Hero Title</label>
+                  <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                    value={editableContent.home.heroTitle}
+                    onChange={e => setEditableContent({...editableContent, home: {...editableContent.home, heroTitle: e.target.value}})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700">Hero Subtitle</label>
+                  <textarea rows={3} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                    value={editableContent.home.heroSubtitle}
+                    onChange={e => setEditableContent({...editableContent, home: {...editableContent.home, heroSubtitle: e.target.value}})}
+                  />
+                </div>
+              </div>
+
+              {/* About Section */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-lg text-amber-600 border-b pb-2">About Page</h4>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700">Page Title</label>
+                  <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                    value={editableContent.about.title}
+                    onChange={e => setEditableContent({...editableContent, about: {...editableContent.about, title: e.target.value}})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700">Welcome Text</label>
+                  <textarea rows={5} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                    value={editableContent.about.welcomeText}
+                    onChange={e => setEditableContent({...editableContent, about: {...editableContent.about, welcomeText: e.target.value}})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700">Philosophy Quote</label>
+                  <textarea rows={2} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" 
+                    value={editableContent.about.philosophyText}
+                    onChange={e => setEditableContent({...editableContent, about: {...editableContent.about, philosophyText: e.target.value}})}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex items-center space-x-4">
+                <Button type="submit" size="lg" className="flex items-center">
+                  <Save className="mr-2 h-5 w-5" /> Save Content Changes
+                </Button>
+                {contentSaved && <span className="text-green-600 font-bold animate-pulse">Changes Saved!</span>}
+              </div>
+            </form>
+          </div>
+        )}
+
       </div>
     </div>
   );

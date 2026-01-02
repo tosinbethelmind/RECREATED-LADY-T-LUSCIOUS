@@ -1,15 +1,17 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Instagram, Facebook, Mail, Phone, MapPin } from 'lucide-react';
-import { COMPANY_NAME, COMPANY_EMAIL, COMPANY_PHONE, COMPANY_ADDRESS } from '../constants';
+import { useData } from '../context/DataContext';
 
 export const Footer: React.FC = () => {
+  const { siteContent } = useData();
+
   return (
     <footer className="bg-stone-900 text-stone-50">
       <div className="container py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-amber-500 font-serif">{COMPANY_NAME}</h3>
+            <h3 className="text-xl font-bold text-amber-500 font-serif">{siteContent.general.companyName}</h3>
             <p className="text-stone-300 text-sm leading-relaxed">
               Crafting sweet memories one bite at a time. We specialize in custom cakes, delectable pastries, and catering for all your special occasions.
             </p>
@@ -47,22 +49,22 @@ export const Footer: React.FC = () => {
             <ul className="space-y-3 text-sm text-stone-300">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 mr-2 text-amber-500 shrink-0" />
-                <span>{COMPANY_ADDRESS}</span>
+                <span>{siteContent.general.address}</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-2 text-amber-500 shrink-0" />
-                <span>{COMPANY_PHONE}</span>
+                <span>{siteContent.general.phone}</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-2 text-amber-500 shrink-0" />
-                <span>{COMPANY_EMAIL}</span>
+                <span>{siteContent.general.email}</span>
               </li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-stone-800 mt-12 pt-8 text-center text-sm text-stone-400">
-          <p>&copy; {new Date().getFullYear()} {COMPANY_NAME}. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {siteContent.general.companyName}. All rights reserved.</p>
         </div>
       </div>
     </footer>

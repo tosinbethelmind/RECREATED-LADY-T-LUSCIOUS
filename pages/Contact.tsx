@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { Button } from '../components/Button';
-import { COMPANY_EMAIL, COMPANY_PHONE, COMPANY_ADDRESS } from '../constants';
+import { useData } from '../context/DataContext';
 
 export const Contact: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
+  const { siteContent } = useData();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +35,7 @@ export const Contact: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-stone-900">Visit Us</p>
-                    <p className="text-stone-500">{COMPANY_ADDRESS}</p>
+                    <p className="text-stone-500">{siteContent.general.address}</p>
                   </div>
                 </div>
                 
@@ -44,7 +45,7 @@ export const Contact: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-stone-900">Call Us</p>
-                    <p className="text-stone-500">{COMPANY_PHONE}</p>
+                    <p className="text-stone-500">{siteContent.general.phone}</p>
                     <p className="text-xs text-stone-400 mt-1">Mon-Fri from 8am to 5pm</p>
                   </div>
                 </div>
@@ -55,7 +56,7 @@ export const Contact: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-stone-900">Email Us</p>
-                    <p className="text-stone-500">{COMPANY_EMAIL}</p>
+                    <p className="text-stone-500">{siteContent.general.email}</p>
                   </div>
                 </div>
               </div>

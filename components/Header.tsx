@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag } from 'lucide-react';
-import { NAV_LINKS, COMPANY_NAME } from '../constants';
+import { NAV_LINKS } from '../constants';
 import { Button } from './Button';
+import { useData } from '../context/DataContext';
 
 export const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const { siteContent } = useData();
   
   // Header background logic
   const [scrolled, setScrolled] = useState(false);
@@ -24,44 +26,47 @@ export const Header: React.FC = () => {
   const isTransparent = isHome && !scrolled;
   
   const headerClasses = isTransparent
-    ? "fixed top-0 z-50 w-full transition-all duration-300 border-b border-transparent py-4"
-    : "sticky top-0 z-50 w-full transition-all duration-300 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 py-2 shadow-sm";
+    ? "fixed top-0 z-50 w-full transition-all duration-300 border-b border-transparent py-4 bg-gradient-to-b from-black/50 to-transparent"
+    : "sticky top-0 z-50 w-full transition-all duration-300 border-b border-[#5d3a2a] bg-[#2e1a10]/95 backdrop-blur supports-[backdrop-filter]:bg-[#2e1a10]/90 py-3 shadow-lg";
 
-  const textColorClass = isTransparent ? "text-white" : "text-stone-800";
+  // Always use light text on brown background
+  const textColorClass = "text-amber-50";
+  
   const navLinkClass = isTransparent 
-    ? "text-stone-200 hover:text-amber-400 hover:border-b-2 hover:border-amber-400" 
-    : "text-stone-600 hover:text-primary";
-  const activeNavLinkClass = isTransparent
-    ? "text-amber-400 border-b-2 border-amber-400"
-    : "text-primary font-semibold";
+    ? "text-stone-200 hover:text-amber-400 hover:border-b-2 hover:border-amber-400 font-bold drop-shadow-sm" 
+    : "text-stone-300 hover:text-amber-400 font-bold";
+    
+  const activeNavLinkClass = "text-amber-400 border-b-2 border-amber-400 font-bold";
 
   return (
     <header className={headerClasses}>
-      <div className="container flex h-20 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between">
         <NavLink to="/" className="mr-6 flex items-center space-x-3 group">
           {/* Logo Circle */}
-          <div className="h-12 w-12 bg-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-lg group-hover:bg-amber-600 transition-colors">
-            <span className="font-serif font-bold text-white text-xl">LT</span>
+          <div className="h-10 w-10 bg-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-lg group-hover:bg-amber-600 transition-colors ring-2 ring-white/20">
+            <span className="font-serif font-bold text-white text-lg">
+              {siteContent.general.companyName.substring(0,2).toUpperCase()}
+            </span>
           </div>
           
           {/* Text Stack */}
           <div className="flex flex-col">
-            <span className={`font-serif font-bold text-2xl md:text-3xl leading-none ${isTransparent ? 'text-white' : 'text-stone-900'}`}>
-              {COMPANY_NAME}
+            <span className={`font-serif font-bold text-xl md:text-2xl leading-none text-amber-50 drop-shadow-md`}>
+              {siteContent.general.companyName}
             </span>
-            <span className="text-[0.65rem] tracking-[0.2em] font-medium text-amber-500 uppercase mt-1">
-              Creamy Cake & Pastries
+            <span className="text-[0.6rem] tracking-[0.2em] font-medium text-amber-400 uppercase mt-0.5">
+              {siteContent.general.tagline}
             </span>
           </div>
         </NavLink>
         
-        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium">
+        <nav className="hidden md:flex items-center space-x-8 text-sm">
           {NAV_LINKS.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `pb-1 transition-all ${
+                `pb-1 transition-all tracking-wide ${
                   isActive ? activeNavLinkClass : navLinkClass
                 }`
               }
@@ -74,10 +79,11 @@ export const Header: React.FC = () => {
         <div className="flex items-center space-x-4">
           <NavLink to="/order">
             <Button 
-              className={`hidden sm:flex rounded-full font-bold px-6 shadow-lg ${isTransparent ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}`}
+              className={`hidden sm:flex rounded-full font-bold px-6 shadow-lg bg-amber-600 hover:bg-amber-500 text-white border-none`}
+              size="sm"
             >
               <ShoppingBag className="mr-2 h-4 w-4" />
-              Order Now
+              Order
             </Button>
           </NavLink>
           
@@ -93,7 +99,7 @@ export const Header: React.FC = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-background border-b shadow-xl">
+        <div className="md:hidden absolute top-full left-0 w-full bg-[#2e1a10] border-b border-[#5d3a2a] shadow-xl">
           <div className="space-y-1 px-4 pb-6 pt-2">
             {NAV_LINKS.map((link) => (
               <NavLink
@@ -101,10 +107,10 @@ export const Header: React.FC = () => {
                 to={link.path}
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
-                  `block rounded-md px-3 py-3 text-base font-medium ${
+                  `block rounded-md px-3 py-3 text-base font-bold ${
                     isActive
-                      ? "bg-amber-50 text-primary"
-                      : "text-stone-600 hover:bg-stone-50 hover:text-primary"
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "text-stone-300 hover:bg-white/5 hover:text-amber-400"
                   }`
                 }
               >
@@ -113,7 +119,7 @@ export const Header: React.FC = () => {
             ))}
             <div className="pt-4">
                <NavLink to="/order" onClick={() => setIsOpen(false)}>
-                <Button className="w-full justify-center rounded-full py-6 text-lg">Order Online</Button>
+                <Button className="w-full justify-center rounded-full py-6 text-lg bg-amber-600 hover:bg-amber-500 text-white">Order Online</Button>
               </NavLink>
             </div>
           </div>

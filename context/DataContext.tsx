@@ -1,15 +1,17 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { MenuItem, GalleryItem } from '../types';
-import { MENU_ITEMS as INITIAL_MENU, GALLERY_IMAGES as INITIAL_GALLERY } from '../constants';
+import { MenuItem, GalleryItem, SiteContent } from '../types';
+import { MENU_ITEMS as INITIAL_MENU, GALLERY_IMAGES as INITIAL_GALLERY, INITIAL_SITE_CONTENT } from '../constants';
 
 interface DataContextType {
   menuItems: MenuItem[];
   galleryItems: GalleryItem[];
+  siteContent: SiteContent;
   addMenuItem: (item: MenuItem) => void;
   updateMenuItem: (item: MenuItem) => void;
   deleteMenuItem: (id: string) => void;
   addGalleryItem: (item: GalleryItem) => void;
   deleteGalleryItem: (id: string) => void;
+  updateSiteContent: (content: SiteContent) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -26,6 +28,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : INITIAL_GALLERY;
   });
 
+  const [siteContent, setSiteContent] = useState<SiteContent>(() => {
+    const saved = localStorage.getItem('siteContent');
+    return saved ? JSON.parse(saved) : INITIAL_SITE_CONTENT;
+  });
+
   // Save to localStorage on change
   useEffect(() => {
     localStorage.setItem('menuItems', JSON.stringify(menuItems));
@@ -34,6 +41,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('galleryItems', JSON.stringify(galleryItems));
   }, [galleryItems]);
+
+  useEffect(() => {
+    localStorage.setItem('siteContent', JSON.stringify(siteContent));
+  }, [siteContent]);
 
   const addMenuItem = (item: MenuItem) => {
     setMenuItems([...menuItems, item]);
@@ -55,15 +66,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setGalleryItems(galleryItems.filter(item => item.id !== id));
   };
 
+  const updateSiteContent = (content: SiteContent) => {
+    setSiteContent(content);
+  };
+
   return (
     <DataContext.Provider value={{ 
       menuItems, 
       galleryItems, 
+      siteContent,
       addMenuItem, 
       updateMenuItem, 
       deleteMenuItem, 
       addGalleryItem, 
-      deleteGalleryItem 
+      deleteGalleryItem,
+      updateSiteContent
     }}>
       {children}
     </DataContext.Provider>
