@@ -17,57 +17,97 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize from localStorage if available, else use constants
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
-    const saved = localStorage.getItem('menuItems');
-    return saved ? JSON.parse(saved) : INITIAL_MENU;
-  });
+  // Initial State: Use constants first, then try to overwrite with API data
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(INITIAL_GALLERY);
+  const [siteContent, setSiteContent] = useState<SiteContent>(INITIAL_SITE_CONTENT);
 
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => {
-    const saved = localStorage.getItem('galleryItems');
-    return saved ? JSON.parse(saved) : INITIAL_GALLERY;
-  });
-
-  const [siteContent, setSiteContent] = useState<SiteContent>(() => {
-    const saved = localStorage.getItem('siteContent');
-    return saved ? JSON.parse(saved) : INITIAL_SITE_CONTENT;
-  });
-
-  // Save to localStorage on change
+  // Load Data from API on Mount
   useEffect(() => {
-    localStorage.setItem('menuItems', JSON.stringify(menuItems));
-  }, [menuItems]);
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api.php?action=get_data');
+        if (!response.ok) throw new Error("API not available");
+        
+        const data = await response.json();
+        
+        if (data.menuItems && data.menuItems.length > 0) {
+          setMenuItems(data.menuItems);
+        }
+        if (data.galleryItems && data.galleryItems.length > 0) {
+          setGalleryItems(data.galleryItems);
+        }
+        if (data.siteContent) {
+          setSiteContent(data.siteContent);
+        }
+      } catch (error) {
+        console.warn("Could not fetch from Database (likely running locally or DB not configured). Using default/local data.", error);
+        
+        // Fallback: Check LocalStorage if API fails
+        const localMenu = localStorage.getItem('menuItems');
+        if (localMenu) setMenuItems(JSON.parse(localMenu));
+        
+        const localGallery = localStorage.getItem('galleryItems');
+        if (localGallery) setGalleryItems(JSON.parse(localGallery));
 
-  useEffect(() => {
-    localStorage.setItem('galleryItems', JSON.stringify(galleryItems));
-  }, [galleryItems]);
+        const localContent = localStorage.getItem('siteContent');
+        if (localContent) setSiteContent(JSON.parse(localContent));
+      }
+    };
 
-  useEffect(() => {
-    localStorage.setItem('siteContent', JSON.stringify(siteContent));
-  }, [siteContent]);
+    fetchData();
+  }, []);
+
+  // --- Helper to Send Data to API ---
+  const sendToApi = (action: string, data: any) => {
+    fetch(`/api.php?action=${action}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).catch(err => console.error("Failed to sync with DB", err));
+  };
+
+  // --- Actions ---
 
   const addMenuItem = (item: MenuItem) => {
-    setMenuItems([...menuItems, item]);
+    const newItems = [...menuItems, item];
+    setMenuItems(newItems);
+    localStorage.setItem('menuItems', JSON.stringify(newItems));
+    sendToApi('save_menu', item);
   };
 
   const updateMenuItem = (updatedItem: MenuItem) => {
-    setMenuItems(menuItems.map(item => item.id === updatedItem.id ? updatedItem : item));
+    const newItems = menuItems.map(item => item.id === updatedItem.id ? updatedItem : item);
+    setMenuItems(newItems);
+    localStorage.setItem('menuItems', JSON.stringify(newItems));
+    sendToApi('save_menu', updatedItem);
   };
 
   const deleteMenuItem = (id: string) => {
-    setMenuItems(menuItems.filter(item => item.id !== id));
+    const newItems = menuItems.filter(item => item.id !== id);
+    setMenuItems(newItems);
+    localStorage.setItem('menuItems', JSON.stringify(newItems));
+    sendToApi('delete_menu', { id });
   };
 
   const addGalleryItem = (item: GalleryItem) => {
-    setGalleryItems([item, ...galleryItems]);
+    const newItems = [item, ...galleryItems];
+    setGalleryItems(newItems);
+    localStorage.setItem('galleryItems', JSON.stringify(newItems));
+    sendToApi('save_gallery', item);
   };
 
   const deleteGalleryItem = (id: string) => {
-    setGalleryItems(galleryItems.filter(item => item.id !== id));
+    const newItems = galleryItems.filter(item => item.id !== id);
+    setGalleryItems(newItems);
+    localStorage.setItem('galleryItems', JSON.stringify(newItems));
+    sendToApi('delete_gallery', { id });
   };
 
   const updateSiteContent = (content: SiteContent) => {
     setSiteContent(content);
+    localStorage.setItem('siteContent', JSON.stringify(content));
+    sendToApi('save_content', content);
   };
 
   return (
