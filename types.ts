@@ -3,7 +3,7 @@ export interface MenuItem {
   name: string;
   description: string;
   price: string;
-  category: 'Cakes' | 'Cupcakes' | 'Pastries' | 'Savory' | 'Drinks';
+  category: 'Main Dishes' | 'Soups' | 'Sides' | 'Pastries' | 'Drinks' | 'Catering' | 'Cakes' | 'Cupcakes' | 'Savory';
   image?: string;
   popular?: boolean;
 }
